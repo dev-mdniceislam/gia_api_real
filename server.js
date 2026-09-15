@@ -1,13 +1,14 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const path = require('path');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const responseHandler = require('./src/middlewares/responseHandler');
 const connectDB = require('./src/config/db');
 
 //Routes Imports
-const homeRoute = require('./src/routes/homeRoutes');
+const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
 
 //load env vars
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cors());
 app.use(responseHandler);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
