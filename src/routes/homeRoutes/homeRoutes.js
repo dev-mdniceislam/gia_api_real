@@ -15,6 +15,13 @@ const {
   updateHeroData,
   deleteHeroData,
 } = require('../../controllers/homeController/heroSectionController');
+const {
+  gurdianComments,
+  getAllCommentsForAdmin,
+  getApprovedComments,
+  updateCommentStatus,
+  deleteComment,
+} = require('../../controllers/homeController/parentsCommentController');
 
 //----------------> Notice CRUD <-------------------
 router.route('/notice').get(getAllNotice).post(createNotice);
@@ -48,5 +55,16 @@ const upload = multer({
 router.route('/herosection').get(getHeroData).delete(deleteHeroData);
 router.post('/herosection', upload.array('slideImage', 4), createHeroData);
 router.put('/herosection', upload.array('slideImage', 4), updateHeroData);
+
+// -------------------------> Parent Comments Routes <-------------------------
+router
+  .route('/parentCommentUser')
+  .get(getApprovedComments)
+  .post(gurdianComments);
+router
+  .route('/parentCommentAdmin/:id')
+  .patch(updateCommentStatus)
+  .delete(deleteComment);
+router.get('/parentCommentAdmin', getAllCommentsForAdmin);
 
 module.exports = router;

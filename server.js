@@ -9,6 +9,7 @@ const connectDB = require('./src/config/db');
 
 //Routes Imports
 const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
+const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
 
 //load env vars
 dotenv.config();
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 
 //Routes
 app.use('/api/v1/home', homeRoute);
+app.use('/api/v1/webshell', webshellRoute);
 
 // Routes handler
 app.use((req, res, next) => {

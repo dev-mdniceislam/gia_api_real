@@ -1,5 +1,5 @@
 const heroSection = require('../../models/homeModels/heroSectionModel');
-const deleteFiles = require('../../utils/fileDeleteMIddleware');
+const deleteFiles = require('../../middlewares/fileDeleteMIddleware');
 
 // Hero Section Data Get
 exports.getHeroData = async (req, res) => {
