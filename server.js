@@ -8,8 +8,9 @@ const responseHandler = require('./src/middlewares/responseHandler');
 const connectDB = require('./src/config/db');
 
 //Routes Imports
-const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
 const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
+const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
+const galleryRoutes = require('./src/routes/galleryRoutes/galleryRoutes');
 
 //load env vars
 dotenv.config();
@@ -40,8 +41,9 @@ app.get('/', (req, res) => {
 });
 
 //Routes
-app.use('/api/v1/home', homeRoute);
 app.use('/api/v1/webshell', webshellRoute);
+app.use('/api/v1/home', homeRoute);
+app.use('/api/v1/gallery', galleryRoutes);
 
 // Routes handler
 app.use((req, res, next) => {

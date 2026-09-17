@@ -1,5 +1,4 @@
 const express = require('express');
-const multer = require('multer');
 const uploadFile = require('../../middlewares/multerMiddleware');
 const path = require('path');
 
