@@ -18,60 +18,29 @@ exports.getHeroData = async (req, res) => {
   }
 };
 
-// Hero Section Data Create
-exports.createHeroData = async (req, res) => {
-  try {
-    const heroData = await heroSection.findOne();
-    if (heroData) {
-      return res.error(400, 'Data already exists.', null);
-    }
-
-    const { subtitle } = req.body || {};
-
-    let imagePaths = [];
-    if (req.files && req.files.length > 0) {
-      imagePaths = req.files.map((file) => file.filename);
-    }
-
-    const newHero = new heroSection({
-      subtitle: subtitle || '',
-      slideImage: imagePaths,
-    });
-
-    await newHero.save();
-    return res.success(201, 'Hero section data added successfully', newHero);
-  } catch (error) {
-    return res.error(500, error.message, null);
-  }
-};
-
 // Hero Section Data Update
 exports.updateHeroData = async (req, res) => {
   try {
     const { subtitle } = req.body;
     const updatePayload = {};
 
-    if (subtitle) updatePayload.subtitle = subtitle;
+    if (subtitle !== undefined) updatePayload.subtitle = subtitle.toString();
 
     if (req.files && req.files.length > 0) {
       const oldData = await heroSection.findOne();
-      if (oldData && oldData.slideImage) {
+      if (oldData && oldData.slideImage && oldData.slideImage.length > 0) {
         deleteFiles(oldData.slideImage);
       }
       updatePayload.slideImage = req.files.map((file) => file.filename);
     }
 
-    const newHeroUpdate = await heroSection.findOneAndUpdate(
-      {},
-      updatePayload,
-      { new: true, runValidators: true },
-    );
+    const updatedHero = await heroSection.findOneAndUpdate({}, updatePayload, {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    });
 
-    if (!newHeroUpdate) {
-      return res.error(404, 'Hero data not found to update');
-    }
-
-    return res.success(200, 'Hero Section updated successfully', newHeroUpdate);
+    return res.success(200, 'Hero Section updated successfully', updatedHero);
   } catch (error) {
     return res.error(500, error.message, null);
   }

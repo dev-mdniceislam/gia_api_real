@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const uploadFile = require('../../middlewares/multerMiddleware');
 const path = require('path');
 
 const router = express.Router();
@@ -11,7 +12,6 @@ const {
 } = require('../../controllers/homeController/noticeController');
 const {
   getHeroData,
-  createHeroData,
   updateHeroData,
   deleteHeroData,
 } = require('../../controllers/homeController/heroSectionController');
@@ -28,33 +28,16 @@ router.route('/notice').get(getAllNotice).post(createNotice);
 router.route('/notice/:id').delete(deleteNotice);
 
 //-------------------> Hero Section Multer & CRUD <-------------------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const extName = path.extname(file.originalname);
-    const fileName =
-      file.originalname
-        .replace(extName, '')
-        .toLowerCase()
-        .split(' ')
-        .join('-') +
-      '-' +
-      Date.now() +
-      extName;
-    cb(null, fileName);
-  },
+const upload = uploadFile({
+  isNamedDate: true,
+  maxSizeMB: 5,
 });
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
-
-router.route('/herosection').get(getHeroData).delete(deleteHeroData);
-router.post('/herosection', upload.array('slideImage', 4), createHeroData);
-router.put('/herosection', upload.array('slideImage', 4), updateHeroData);
+router
+  .route('/herosection')
+  .get(getHeroData)
+  .delete(deleteHeroData)
+  .put(upload.array('slideImage', 4), updateHeroData);
 
 // -------------------------> Parent Comments Routes <-------------------------
 router

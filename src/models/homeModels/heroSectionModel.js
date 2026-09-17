@@ -17,13 +17,20 @@ function arrayLimit(val) {
 
 heroSection.set('toJSON', {
   transform: (doc, ret) => {
-    const transformed = {
-      id: ret._id.toString(),
-      ...ret,
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+    const formattedImages = (ret.slideImage || []).map((img) => {
+      const fileName = img.includes('/') ? img.split('/').pop() : img;
+      return `${BASE_URL}/uploads/${fileName}`;
+    });
+    delete ret.__v;
+    delete ret._id;
+    return {
+      subtitle: ret.subtitle || '',
+      slideImage: formattedImages,
+      createdAt: ret.createdAt,
+      updatedAt: ret.updatedAt,
     };
-    delete transformed._id;
-    delete transformed.__v;
-    return transformed;
   },
 });
 
