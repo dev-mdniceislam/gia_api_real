@@ -11,6 +11,7 @@ const connectDB = require('./src/config/db');
 const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
 const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
 const galleryRoutes = require('./src/routes/galleryRoutes/galleryRoutes');
+const teacherRoutes = require('./src/routes/teacherRoutes/teacherRoutes');
 
 //load env vars
 dotenv.config();
@@ -44,6 +45,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/webshell', webshellRoute);
 app.use('/api/v1/home', homeRoute);
 app.use('/api/v1/gallery', galleryRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
 
 // Routes handler
 app.use((req, res, next) => {
