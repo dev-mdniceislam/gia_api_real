@@ -1,7 +1,5 @@
 const express = require('express');
 const uploadFile = require('../../middlewares/multerMiddleware');
-const path = require('path');
-
 const router = express.Router();
 
 const {
@@ -21,6 +19,14 @@ const {
   updateCommentStatus,
   deleteComment,
 } = require('../../controllers/homeController/parentsCommentController');
+
+const {
+  sscStudentGetAll,
+  getSSCStudentsById,
+  createSSCStudent,
+  updateSSCStudent,
+  deleteSSCStudent,
+} = require('../../controllers/homeController/SSCPassedStudentController');
 
 //----------------> Notice CRUD <-------------------
 router.route('/notice').get(getAllNotice).post(createNotice);
@@ -48,5 +54,16 @@ router
   .patch(updateCommentStatus)
   .delete(deleteComment);
 router.get('/parentCommentAdmin', getAllCommentsForAdmin);
+
+// -------------------------> SSC passed student Routes  <-------------------------
+router
+  .route('/candidates')
+  .get(sscStudentGetAll)
+  .post(upload.single('image'), createSSCStudent);
+router
+  .route('/candidates/:id')
+  .get(getSSCStudentsById)
+  .put(upload.single('image'), updateSSCStudent)
+  .delete(deleteSSCStudent);
 
 module.exports = router;
