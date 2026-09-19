@@ -1,5 +1,5 @@
 const express = require('express');
-const uploadFile = require('../../middlewares/multerMiddleware');
+const { upload } = require('../../middlewares/multerMiddleware');
 const router = express.Router();
 const isValidToken = require('../../middlewares/authMiddleware');
 
@@ -25,10 +25,6 @@ const {
 } = require('../../controllers/homeController/SSCPassedStudentController');
 
 //-------------------> Hero Section Multer & CRUD <-------------------------
-const upload = uploadFile({
-  isNamedDate: true,
-  maxSizeMB: 5,
-});
 
 router
   .route('/herosection')

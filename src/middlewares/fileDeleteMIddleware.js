@@ -1,15 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+const { cloudinary } = require('./multerMiddleware');
 
-const deleteFiles = (fileArray) => {
-  if (fileArray && fileArray.length > 0) {
-    fileArray.forEach((fileName) => {
-      const filePath = path.join(__dirname, '../../uploads/', fileName);
-      fs.unlink(filePath, (err) => {
-        if (err) console.log(`Failed to delete file: ${fileName}`, err);
-      });
-    });
+const deleteFileFromCloudinary = async (publicId) => {
+  try {
+    if (!publicId) return;
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error('Error deleting image from Cloudinary:', error);
   }
 };
 
-module.exports = deleteFiles;
+module.exports = deleteFileFromCloudinary;

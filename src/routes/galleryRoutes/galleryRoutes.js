@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const uploadFile = require('../../middlewares/multerMiddleware');
+const { upload } = require('../../middlewares/multerMiddleware');
 const isValidToken = require('../../middlewares/authMiddleware');
 
 // Controller imports
@@ -12,11 +12,6 @@ const {
   deleteCategory,
   deleteSingleImageFromCategory,
 } = require('../../controllers/galleryController/galleryController');
-
-const upload = uploadFile({
-  isNamedDate: true,
-  maxSizeMB: 5,
-});
 
 // Base route: / (e.g., /api/gallery)
 router

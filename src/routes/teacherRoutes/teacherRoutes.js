@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const uploadFile = require('../../middlewares/multerMiddleware');
+const { upload } = require('../../middlewares/multerMiddleware');
 const isValidToken = require('../../middlewares/authMiddleware');
 
 // all controller imports here
@@ -13,10 +13,7 @@ const {
 } = require('../../controllers/teacherController/teacherController');
 
 // upload middleware
-const upload = uploadFile({
-  isNamedDate: true,
-  maxSizeMB: 5,
-});
+
 router
   .route('/')
   .get(getAllTeachers)

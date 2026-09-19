@@ -1,55 +1,23 @@
 const multer = require('multer');
-const path = require('path');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const createUploader = ({
-  destination,
-  allowedTypes,
-  maxSizeMB,
-  isNamedDate = true,
-}) => {
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, destination || './uploads/');
-    },
-    filename: (req, file, cb) => {
-      const extName = path.extname(file.originalname);
-      const cleanName = file.originalname
-        .replace(extName, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '-');
+// Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-      const timeStamp = isNamedDate ? `-${Date.now()}` : '';
-      const fileName = `${cleanName}${timeStamp}${extName}`;
+// Storage Setup for Multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'gia_uploads',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+});
 
-      cb(null, fileName);
-    },
-  });
+const upload = multer({ storage });
 
-  const fileFilter = (req, file, cb) => {
-    if (allowedTypes && allowedTypes.length > 0) {
-      const isAllowed = allowedTypes.includes(file.mimetype);
-      if (isAllowed) {
-        cb(null, true);
-      } else {
-        cb(
-          new Error(
-            `Invalid file type! Allowed types: ${allowedTypes.join(', ')}`,
-          ),
-          false,
-        );
-      }
-    } else {
-      cb(null, true);
-    }
-  };
-
-  return multer({
-    storage: storage,
-    limits: {
-      fileSize: (maxSizeMB || 5) * 1024 * 1024,
-    },
-    fileFilter: fileFilter,
-  });
-};
-
-module.exports = createUploader;
+module.exports = { upload, cloudinary };
