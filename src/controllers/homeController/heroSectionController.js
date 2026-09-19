@@ -28,10 +28,22 @@ exports.updateHeroData = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       const oldData = await heroSection.findOne();
-      if (oldData && oldData.slideImage && oldData.slideImage.length > 0) {
-        deleteFiles(oldData.slideImage);
+
+      if (
+        oldData &&
+        oldData.slideImagePublicIds &&
+        oldData.slideImagePublicIds.length > 0
+      ) {
+        for (const publicId of oldData.slideImagePublicIds) {
+          await deleteFileFromCloudinary(publicId);
+        }
       }
-      updatePayload.slideImage = req.files.map((file) => file.filename);
+
+      // ২. নতুন ফাইলসমূহের Cloudinary URL এবং Public IDs সেভ করা
+      updatePayload.slideImage = req.files.map((file) => file.path); // Cloudinary URL
+      updatePayload.slideImagePublicIds = req.files.map(
+        (file) => file.filename,
+      ); // Cloudinary Public ID
     }
 
     const updatedHero = await heroSection.findOneAndUpdate({}, updatePayload, {
@@ -42,6 +54,12 @@ exports.updateHeroData = async (req, res) => {
 
     return res.success(200, 'Hero Section updated successfully', updatedHero);
   } catch (error) {
+    // কোনো এরর হলে ক্লাউডিনারিতে সদ্য আপলোড হওয়া নতুন ছবিগুলো মুছে ফেলা
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        await deleteFileFromCloudinary(file.filename);
+      }
+    }
     return res.error(500, error.message, null);
   }
 };
