@@ -4,7 +4,7 @@ exports.getHomeItemShow = async (req, res) => {
   try {
     const getData = await HomeItemShow.findOne();
     if (!getData) {
-      return res.error(404, 'Home item show data not found');
+      return res.error(404, 'Home item show data not found', []);
     }
 
     return res.success(

@@ -59,16 +59,11 @@ exports.updateCommentStatus = async (req, res) => {
       { new: true, runValidators: true },
     );
 
-    const allComments = await parentComment.find().sort({ createdAt: -1 });
-    if (!allComments) {
-      return res.error(404, 'Comments are not found', null);
-    }
-
     if (!updated) {
       return res.error(404, 'Comment not found');
     }
 
-    return res.success(200, 'Comment accepted successfully.', allComments);
+    return res.success(200, 'Comment accepted successfully.', updated);
   } catch (error) {
     return res.error(500, error.message, null);
   }

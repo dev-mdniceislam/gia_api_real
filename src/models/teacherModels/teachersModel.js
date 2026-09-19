@@ -9,6 +9,7 @@ const teacherSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   isLeadership: { type: Boolean, default: false },
   email: { type: String, default: '' },
+  phone: { type: String, default: '' },
   bio: { type: String, default: '' },
 });
 
@@ -31,6 +32,7 @@ teacherSchema.set('toJSON', {
       imageUrl: formatImageData,
       isLeadership: ret.isLeadership,
       email: ret.email,
+      phone: ret.phone,
       bio: ret.bio,
     };
   },

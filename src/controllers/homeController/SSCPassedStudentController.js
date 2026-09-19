@@ -1,4 +1,5 @@
 const SSCStudent = require('../../models/homeModels/SSCPassedStudentModel');
+const deleteFile = require('../../middlewares/fileDeleteMIddleware');
 
 exports.sscStudentGetAll = async (req, res) => {
   try {
@@ -40,6 +41,9 @@ exports.createSSCStudent = async (req, res) => {
     const { name, roll, examName, gpa } = req.body;
 
     if (!name || !gpa) {
+      if (req.file) {
+        deleteFile([req.file.filename]);
+      }
       return res.error(400, 'Name and GPA are required', null);
     }
 
@@ -47,6 +51,9 @@ exports.createSSCStudent = async (req, res) => {
       const existingStudent = await SSCStudent.findOne({ name, roll });
 
       if (existingStudent) {
+        if (req.file) {
+          deleteFile([req.file.filename]);
+        }
         return res.error(
           400,
           'Student with this name and roll already exists',
@@ -69,10 +76,12 @@ exports.createSSCStudent = async (req, res) => {
 
     return res.success(201, 'SSC student created successfully', savedStudent);
   } catch (error) {
+    if (req.file) {
+      deleteFile([req.file.filename]);
+    }
     return res.error(500, error.message, null);
   }
 };
-
 exports.updateSSCStudent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -80,10 +89,19 @@ exports.updateSSCStudent = async (req, res) => {
 
     const student = await SSCStudent.findById(id);
     if (!student) {
+      if (req.file) deleteFile([req.file.filename]);
       return res.error(404, 'Student not found', null);
     }
 
-    const imageName = req.file ? req.file.filename : student.image;
+    let imageName = student.image;
+
+    // If a new file is uploaded, remove the old image file
+    if (req.file) {
+      if (student.image) {
+        deleteFile([student.image]);
+      }
+      imageName = req.file.filename;
+    }
 
     const updatedStudent = await SSCStudent.findByIdAndUpdate(
       id,
@@ -93,6 +111,9 @@ exports.updateSSCStudent = async (req, res) => {
 
     return res.success(200, 'Student updated successfully', updatedStudent);
   } catch (error) {
+    if (req.file) {
+      deleteFile([req.file.filename]);
+    }
     return res.error(500, error.message, null);
   }
 };
@@ -104,6 +125,11 @@ exports.deleteSSCStudent = async (req, res) => {
     const deletedStudent = await SSCStudent.findByIdAndDelete(id);
     if (!deletedStudent) {
       return res.error(404, 'Student not found to delete', null);
+    }
+
+    // Clean up stored image upon record deletion
+    if (deletedStudent.image) {
+      deleteFile([deletedStudent.image]);
     }
 
     return res.success(200, 'Student deleted successfully', null);

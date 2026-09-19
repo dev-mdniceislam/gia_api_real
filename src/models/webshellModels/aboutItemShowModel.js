@@ -1,16 +1,13 @@
 const mongoose = require('mongoose');
 
-const AboutItemShowSchema = new mongoose.Schema(
-  {
-    detailsTextShow: { type: Boolean, required: true },
-    detailsImageShow: { type: Boolean, required: true },
-    goalsShow: { type: Boolean, required: true },
-    ayatCardShow: { type: Boolean, required: true },
-    schoolAttributesShow: { type: Boolean, required: true },
-    showCommitment: { type: Boolean, required: true },
-  },
-  { timestamps: true },
-);
+const AboutItemShowSchema = new mongoose.Schema({
+  detailsTextShow: { type: Boolean, required: true },
+  detailsImageShow: { type: Boolean, required: true },
+  goalsShow: { type: Boolean, required: true },
+  ayatCardShow: { type: Boolean, required: true },
+  schoolAttributesShow: { type: Boolean, required: true },
+  showCommitment: { type: Boolean, required: true },
+});
 
 AboutItemShowSchema.set('toJSON', {
   transform: (doc, ret) => {

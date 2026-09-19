@@ -26,6 +26,7 @@ exports.createTeacher = async (req, res) => {
       isLeadership,
       leadershipTag,
       email,
+      phone,
       bio,
     } = req.body;
 
@@ -49,6 +50,7 @@ exports.createTeacher = async (req, res) => {
       isLeadership: isLeadership || false,
       leadershipTag: leadershipTag || '',
       email: email || '',
+      phone: phone.toString(),
       bio: bio || '',
     });
 

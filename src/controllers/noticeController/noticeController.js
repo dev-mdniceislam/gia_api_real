@@ -1,4 +1,4 @@
-const Notice = require('../../models/homeModels/noticeModel');
+const Notice = require('../../models/noticeModels/noticeModel');
 
 //notice all get
 exports.getAllNotice = async (req, res) => {
@@ -27,6 +27,16 @@ exports.deleteNotice = async (req, res) => {
     }
 
     res.success(200, 'Notice deleted successfully', isDelete);
+  } catch (error) {
+    res.error(500, error.message, null);
+  }
+};
+
+exports.deleteAllNotice = async (req, res) => {
+  try {
+    const result = await Notice.deleteMany({});
+
+    res.success(200, 'All notices deleted successfully', []);
   } catch (error) {
     res.error(500, error.message, null);
   }

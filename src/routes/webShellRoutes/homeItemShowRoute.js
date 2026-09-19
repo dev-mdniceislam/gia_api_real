@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const isValidToken = require('../../middlewares/authMiddleware');
 // Controller imports
 const {
   getHomeItemShow,
@@ -12,9 +12,15 @@ const {
 } = require('../../controllers/webShellController/aboutItemShowController');
 
 // Home Show Item Routes
-router.route('/homeitemshow').get(getHomeItemShow).put(updateHomeItemShow);
+router
+  .route('/homeitemshow')
+  .get(getHomeItemShow)
+  .put(isValidToken, updateHomeItemShow);
 
 // About Show Item Routes
-router.route('/aboutitemshow').get(getAboutShowItem).put(updateAboutShowItem);
+router
+  .route('/aboutitemshow')
+  .get(getAboutShowItem)
+  .put(isValidToken, updateAboutShowItem);
 
 module.exports = router;

@@ -5,7 +5,7 @@ exports.getAboutShowItem = async (req, res) => {
     const getData = await AboutShowItemModel.findOne();
 
     if (!getData) {
-      return res.error(404, 'About show item is not found.');
+      return res.error(404, 'About show item is not found.', []);
     }
 
     return res.success(200, 'About show item fetched successfully.', getData);

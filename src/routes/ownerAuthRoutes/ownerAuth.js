@@ -11,8 +11,8 @@ const {
 
 router.post('/register', register);
 router.post('/login', login);
-router.delete('/admin/delete/:id', deleteAdmin);
-router.get('/admin/getAllAdmin', adminGetAll);
+// router.delete('/delete/:id', deleteAdmin);
+// router.get('/getAllAdmin', adminGetAll);
 
 // export router
 module.exports = router;

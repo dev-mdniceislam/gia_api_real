@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const uploadFile = require('../../middlewares/multerMiddleware');
+const isValidToken = require('../../middlewares/authMiddleware');
 
 // all controller imports here
 const {
@@ -19,12 +20,12 @@ const upload = uploadFile({
 router
   .route('/')
   .get(getAllTeachers)
-  .post(upload.single('image'), createTeacher);
+  .post(isValidToken, upload.single('image'), createTeacher);
 router
   .route('/:id')
   .get(getTeacherById)
-  .put(upload.single('image'), updateTeacherInfoById)
-  .delete(deleteTeacherById);
+  .put(isValidToken, upload.single('image'), updateTeacherInfoById)
+  .delete(isValidToken, deleteTeacherById);
 
 // route export
 module.exports = router;
