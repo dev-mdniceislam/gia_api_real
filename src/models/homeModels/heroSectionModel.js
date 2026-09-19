@@ -1,37 +1,39 @@
 const mongoose = require('mongoose');
 
-const heroSection = new mongoose.Schema(
+const heroSectionSchema = new mongoose.Schema(
   {
     subtitle: { type: String, required: false },
     slideImage: {
       type: [{ type: String }],
       validate: [arrayLimit, '{PATH} exceeds the limit of 4'],
     },
+    slideImagePublicIds: {
+      type: [{ type: String }],
+    },
   },
   { timestamps: true },
 );
 
 function arrayLimit(val) {
-  return val.length <= 4;
+  return val ? val.length <= 4 : true;
 }
 
-heroSection.set('toJSON', {
+heroSectionSchema.set('toJSON', {
   transform: (doc, ret) => {
-    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+    ret.id = ret._id;
 
-    const formattedImages = (ret.slideImage || []).map((img) => {
-      const fileName = img.includes('/') ? img.split('/').pop() : img;
-      return `${BASE_URL}/uploads/${fileName}`;
-    });
     delete ret.__v;
     delete ret._id;
+    delete ret.slideImagePublicIds;
+
     return {
+      id: ret.id,
       subtitle: ret.subtitle || '',
-      slideImage: formattedImages,
+      slideImage: ret.slideImage || [],
       createdAt: ret.createdAt,
       updatedAt: ret.updatedAt,
     };
   },
 });
 
-module.exports = mongoose.model('HeroSection', heroSection);
+module.exports = mongoose.model('HeroSection', heroSectionSchema);
