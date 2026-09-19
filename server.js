@@ -12,6 +12,7 @@ const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
 const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
 const galleryRoutes = require('./src/routes/galleryRoutes/galleryRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes/teacherRoutes');
+const ownerRoutes = require('./src/routes/ownerAuthRoutes/ownerAuth');
 
 //load env vars
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/v1/webshell', webshellRoute);
 app.use('/api/v1/home', homeRoute);
 app.use('/api/v1/gallery', galleryRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
+app.use('/api/v1/owner', ownerRoutes);
 
 // Routes handler
 app.use((req, res, next) => {
