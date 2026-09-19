@@ -46,7 +46,7 @@ exports.updateHeroData = async (req, res) => {
     }
 
     const updatedHero = await heroSection.findOneAndUpdate({}, updatePayload, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       upsert: true,
     });
