@@ -1,7 +1,5 @@
 const heroSection = require('../../models/homeModels/heroSectionModel');
-const {
-  deleteFileFromCloudinary,
-} = require('../../middlewares/fileDeleteMIddleware');
+const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMIddleware');
 
 // Hero Section Data Get
 exports.getHeroData = async (req, res) => {
