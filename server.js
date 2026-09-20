@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const connectDB = require('./src/config/db');
 connectDB();
 const responseHandler = require('./src/middlewares/responseHandler');
+const errorHandler = require('./src/middlewares/errorHandlerMiddleware');
 
 //Routes Imports
 const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
@@ -58,11 +59,7 @@ app.use((req, res, next) => {
 });
 
 //Error Handler
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-  res.error(statusCode, message, null);
-});
+app.use(errorHandler);
 
 //server run
 const PORT = process.env.PORT;
