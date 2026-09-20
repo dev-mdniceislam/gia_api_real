@@ -3,26 +3,29 @@ const router = express.Router();
 const { upload } = require('../../middlewares/multerMiddleware');
 const isValidToken = require('../../middlewares/authMiddleware');
 
-// all controller imports here
 const {
-  getAllTeachers,
-  createTeacher,
-  getTeacherById,
-  updateTeacherInfoById,
-  deleteTeacherById,
-} = require('../../controllers/teacherController/teacherController');
+  getGalleryDataAll,
+  createCategory,
+  getImagesByCategoryId,
+  pushImagesToCategory,
+  deleteCategory,
+  deleteSingleImageFromCategory,
+} = require('../../controllers/galleryController/galleryController');
 
-// upload middleware
-
+// Base route: /api/v1/gallery
 router
   .route('/')
-  .get(getAllTeachers)
-  .post(isValidToken, upload.single('image'), createTeacher);
+  .get(getGalleryDataAll)
+  .post(isValidToken, upload.array('images', 10), createCategory);
+
+// Category route by ID: /api/v1/gallery/:id
 router
   .route('/:id')
-  .get(getTeacherById)
-  .put(isValidToken, upload.single('image'), updateTeacherInfoById)
-  .delete(isValidToken, deleteTeacherById);
+  .get(getImagesByCategoryId)
+  .post(isValidToken, upload.array('images', 10), pushImagesToCategory)
+  .delete(isValidToken, deleteCategory);
 
-// route export
+// Delete single image route: /api/v1/gallery/:id/delete-image
+router.delete('/:id/delete-image', isValidToken, deleteSingleImageFromCategory);
+
 module.exports = router;
