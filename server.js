@@ -1,11 +1,14 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
-const dotenv = require('dotenv');
-const responseHandler = require('./src/middlewares/responseHandler');
 const connectDB = require('./src/config/db');
+connectDB();
+const responseHandler = require('./src/middlewares/responseHandler');
 
 //Routes Imports
 const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
@@ -14,10 +17,6 @@ const galleryRoutes = require('./src/routes/galleryRoutes/galleryRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes/teacherRoutes');
 const ownerRoutes = require('./src/routes/ownerAuthRoutes/ownerAuth');
 const noticeRoutes = require('./src/routes/noticeRoutes/noticeRoutes');
-
-//load env vars
-dotenv.config();
-connectDB();
 
 //module scaffolding
 const app = express();

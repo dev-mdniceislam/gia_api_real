@@ -22,46 +22,40 @@ exports.createTeacher = async (req, res) => {
       designation,
       qualification,
       experience,
-      departmentId,
       isLeadership,
-      leadershipTag,
       email,
       phone,
       bio,
     } = req.body;
 
-    if (!name || !designation || !departmentId) {
-      return res.error(
-        400,
-        'Name, designation, and departmentId are required',
-        null,
-      );
+    if (!name || !designation || !req.file) {
+      if (req.file && req.file.filename) {
+        await deleteImage(req.file.filename);
+      }
+      return res.error(400, 'Name, designation, and image are required', null);
     }
-
-    const imageName = req.file ? req.file.filename : '';
 
     const newTeacher = new Teacher({
       name,
       designation,
       qualification: qualification || '',
       experience: experience || '',
-      departmentId,
-      image: imageName,
+      image: req.file.path,
+      imagePublicId: req.file.filename,
       isLeadership: isLeadership || false,
-      leadershipTag: leadershipTag || '',
       email: email || '',
-      phone: phone.toString(),
+      phone: phone ? phone.toString() : '',
       bio: bio || '',
     });
 
     const savedTeacher = await newTeacher.save();
 
     return res.success(201, 'Teacher created successfully', savedTeacher);
-  } catch (error) {
-    if (req.file) {
-      deleteImage();
+  } catch {
+    if (req.file && req.file.filename) {
+      await deleteImage(req.file.filename);
     }
-    return res.error(500, error.message, null);
+    return res.error(500, 'Teacher created failed', null);
   }
 };
 
@@ -76,8 +70,8 @@ exports.getTeacherById = async (req, res) => {
     }
 
     return res.success(200, 'Teacher fetched successfully', teacher);
-  } catch (error) {
-    return res.error(500, error.message, null);
+  } catch {
+    return res.error(500, 'Teacher fetched failed', null);
   }
 };
 
@@ -85,27 +79,31 @@ exports.getTeacherById = async (req, res) => {
 exports.updateTeacherInfoById = async (req, res) => {
   try {
     const { id } = req.params;
+
     const findData = await Teacher.findById(id);
 
     if (!findData) {
-      if (req.file) {
-        deleteImage([req.file.filename]);
+      if (req.file && req.file.filename) {
+        await deleteImage(req.file.filename);
       }
       return res.error(404, 'Teacher not found', null);
     }
 
     let imageName = findData.image;
+    let publicId = findData.imagePublicId;
 
     if (req.file) {
-      if (findData.image) {
-        deleteImage([findData.image]);
+      if (findData.imagePublicId) {
+        await deleteImage(findData.imagePublicId);
       }
-      imageName = req.file.filename;
+      imageName = req.file.path;
+      publicId = req.file.filename;
     }
 
     const updatedData = {
       ...req.body,
       image: imageName,
+      imagePublicId: publicId,
     };
 
     const updatedTeacher = await Teacher.findByIdAndUpdate(id, updatedData, {
@@ -118,11 +116,11 @@ exports.updateTeacherInfoById = async (req, res) => {
       'Teacher info updated successfully',
       updatedTeacher,
     );
-  } catch (error) {
-    if (req.file) {
-      deleteImage([req.file.filename]);
+  } catch {
+    if (req.file && req.file.filename) {
+      await deleteImage(req.file.filename);
     }
-    return res.error(500, error.message, null);
+    return res.error(500, 'Teacher update failed', null);
   }
 };
 
@@ -136,8 +134,8 @@ exports.deleteTeacherById = async (req, res) => {
       return res.error(404, 'Teacher not found to delete', null);
     }
 
-    if (teacher.image) {
-      deleteImage([teacher.image]);
+    if (teacher.imagePublicId) {
+      await deleteImage(teacher.imagePublicId);
     }
 
     return res.success(200, 'Teacher deleted successfully', null);

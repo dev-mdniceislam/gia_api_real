@@ -1,6 +1,7 @@
 const SSCStudent = require('../../models/homeModels/SSCPassedStudentModel');
-const deleteFile = require('../../middlewares/fileDeleteMIddleware');
+const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMIddleware');
 
+// all SSC student get
 exports.sscStudentGetAll = async (req, res) => {
   try {
     const data = await SSCStudent.find().sort({ gpa: -1 });
@@ -14,6 +15,7 @@ exports.sscStudentGetAll = async (req, res) => {
   }
 };
 
+// SSC Student get by id
 exports.getSSCStudentsById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -36,23 +38,24 @@ exports.getSSCStudentsById = async (req, res) => {
   }
 };
 
+// SSC student create
 exports.createSSCStudent = async (req, res) => {
   try {
     const { name, roll, examName, gpa } = req.body;
 
-    if (!name || !gpa) {
-      if (req.file) {
-        deleteFile([req.file.filename]);
+    if (!name || !gpa || !req.file) {
+      if (req.file && req.file.filename) {
+        await deleteFileFromCloudinary(req.file.filename);
       }
-      return res.error(400, 'Name and GPA are required', null);
+      return res.error(400, 'Name, GPA, and Image are required', null);
     }
 
     if (roll) {
       const existingStudent = await SSCStudent.findOne({ name, roll });
 
       if (existingStudent) {
-        if (req.file) {
-          deleteFile([req.file.filename]);
+        if (req.file && req.file.filename) {
+          await deleteFileFromCloudinary(req.file.filename);
         }
         return res.error(
           400,
@@ -62,26 +65,26 @@ exports.createSSCStudent = async (req, res) => {
       }
     }
 
-    const imageName = req.file ? req.file.filename : '';
-
     const newStudent = new SSCStudent({
       name,
       roll: roll || null,
       examName: examName || '',
       gpa,
-      image: imageName,
+      image: req.file.path,
+      imagePublicId: req.file.filename,
     });
 
     const savedStudent = await newStudent.save();
 
     return res.success(201, 'SSC student created successfully', savedStudent);
   } catch (error) {
-    if (req.file) {
-      deleteFile([req.file.filename]);
+    if (req.file && req.file.filename) {
+      await deleteFileFromCloudinary(req.file.filename);
     }
     return res.error(500, error.message, null);
   }
 };
+// SSC student update by id
 exports.updateSSCStudent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -89,30 +92,41 @@ exports.updateSSCStudent = async (req, res) => {
 
     const student = await SSCStudent.findById(id);
     if (!student) {
-      if (req.file) deleteFile([req.file.filename]);
+      if (req.file && req.file.filename) {
+        await deleteFileFromCloudinary(req.file.filename);
+      }
       return res.error(404, 'Student not found', null);
     }
 
     let imageName = student.image;
+    let publicId = student.imagePublicId;
 
-    // If a new file is uploaded, remove the old image file
     if (req.file) {
-      if (student.image) {
-        deleteFile([student.image]);
+      if (student.imagePublicId) {
+        await deleteFileFromCloudinary(student.imagePublicId);
       }
-      imageName = req.file.filename;
+      imageName = req.file.path;
+      publicId = req.file.filename;
     }
 
-    const updatedStudent = await SSCStudent.findByIdAndUpdate(
-      id,
-      { name, roll, examName, gpa, image: imageName },
-      { new: true, runValidators: true },
-    );
+    const updateData = {
+      ...(name && { name }),
+      ...(roll !== undefined && { roll }),
+      ...(examName !== undefined && { examName }),
+      ...(gpa && { gpa }),
+      image: imageName,
+      imagePublicId: publicId,
+    };
+
+    const updatedStudent = await SSCStudent.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     return res.success(200, 'Student updated successfully', updatedStudent);
   } catch (error) {
-    if (req.file) {
-      deleteFile([req.file.filename]);
+    if (req.file && req.file.filename) {
+      await deleteFileFromCloudinary(req.file.filename);
     }
     return res.error(500, error.message, null);
   }
@@ -128,8 +142,8 @@ exports.deleteSSCStudent = async (req, res) => {
     }
 
     // Clean up stored image upon record deletion
-    if (deletedStudent.image) {
-      deleteFile([deletedStudent.image]);
+    if (deletedStudent.imagePublicId) {
+      await deleteFileFromCloudinary(deletedStudent.imagePublicId);
     }
 
     return res.success(200, 'Student deleted successfully', null);

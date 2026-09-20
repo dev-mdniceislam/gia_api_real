@@ -1,32 +1,46 @@
-const { Double } = require('mongodb');
 const mongoose = require('mongoose');
 
-const sscpassedstudent = new mongoose.Schema({
-  name: { type: String, required: true },
-  roll: { type: Number, required: false, default: null },
-  examName: { type: String, required: false, default: '' },
-  gpa: { type: Number, require: true },
-  image: { type: String, required: false, default: '' },
-});
+const sscPassedStudentSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true,
+    },
+    roll: {
+      type: Number,
+      default: null,
+    },
+    examName: {
+      type: String,
+      default: '',
+    },
+    gpa: {
+      type: Number,
+      required: [true, 'GPA is required'],
+    },
+    image: {
+      type: String,
+      default: '',
+    },
+    imagePublicId: {
+      type: String,
+      default: '',
+    },
+  },
+  { timestamps: true },
+);
 
-sscpassedstudent.set('toJSON', {
+// JSON Response Formatting
+sscPassedStudentSchema.set('toJSON', {
   transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
     delete ret.__v;
-    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+    delete ret.imagePublicId;
 
-    const formatImageData = ret.image
-      ? `${BASE_URL}/uploads/${ret.image}`
-      : null;
-
-    return {
-      id: ret._id,
-      name: ret.name,
-      roll: ret.roll || '',
-      examName: ret.examName || '',
-      gpa: ret.gpa,
-      image: formatImageData,
-    };
+    return ret;
   },
 });
 
-module.exports = mongoose.model('SSCPassedStudent', sscpassedstudent);
+module.exports = mongoose.model('SSCPassedStudent', sscPassedStudentSchema);

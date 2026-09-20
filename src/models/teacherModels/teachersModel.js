@@ -1,40 +1,65 @@
 const mongoose = require('mongoose');
 
-const teacherSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  designation: { type: String, required: true },
-  qualification: { type: String, default: '' },
-  experience: { type: String, default: '' },
-  departmentId: { type: String, required: true },
-  image: { type: String, default: '' },
-  isLeadership: { type: Boolean, default: false },
-  email: { type: String, default: '' },
-  phone: { type: String, default: '' },
-  bio: { type: String, default: '' },
-});
+const teacherSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Teacher name is required'],
+      trim: true,
+    },
+    designation: {
+      type: String,
+      required: [true, 'Designation is required'],
+      trim: true,
+    },
+    qualification: {
+      type: String,
+      default: '',
+    },
+    experience: {
+      type: String,
+      default: '',
+    },
+    image: {
+      type: String,
+      default: '',
+    },
+    imagePublicId: {
+      type: String,
+      default: '',
+    },
+    isLeadership: {
+      type: Boolean,
+      default: false,
+    },
+    email: {
+      type: String,
+      default: '',
+      trim: true,
+      lowercase: true,
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    bio: {
+      type: String,
+      default: '',
+    },
+  },
+  { timestamps: true },
+);
 
+// JSON Response Formatting
 teacherSchema.set('toJSON', {
   transform: (doc, ret) => {
-    const id = ret._id;
-    delete ret.__v;
+    ret.id = ret._id;
     delete ret._id;
+    delete ret.__v;
+    delete ret.imagePublicId;
 
-    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
-    const formatImageData = ret.image ? `${BASE_URL}/uploads/${ret.image}` : '';
-
-    return {
-      id: id,
-      name: ret.name,
-      designation: ret.designation,
-      qualification: ret.qualification,
-      experience: ret.experience,
-      departmentId: ret.departmentId,
-      imageUrl: formatImageData,
-      isLeadership: ret.isLeadership,
-      email: ret.email,
-      phone: ret.phone,
-      bio: ret.bio,
-    };
+    return ret;
   },
 });
 
