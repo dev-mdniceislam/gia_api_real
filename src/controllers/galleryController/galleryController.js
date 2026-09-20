@@ -56,11 +56,11 @@ exports.createCategory = async (req, res) => {
 
     await newGallery.save();
     return res.success(201, 'Category created successfully', newGallery);
-  } catch (error) {
+  } catch {
     if (uploadedPublicIds.length > 0) {
       await deleteFileFromCloudinary(uploadedPublicIds);
     }
-    return res.error(500, error.message, null);
+    return res.error(500, 'Category created failed', null);
   }
 };
 
@@ -74,8 +74,8 @@ exports.getImagesByCategoryId = async (req, res) => {
       return res.error(404, 'Category not found', null);
     }
     return res.success(200, 'Images fetched successfully', gallery);
-  } catch (error) {
-    return res.error(500, error.message, null);
+  } catch {
+    return res.error(500, 'Images fetched failed', null);
   }
 };
 
@@ -186,7 +186,7 @@ exports.deleteSingleImageFromCategory = async (req, res) => {
     await deleteFileFromCloudinary(publicId);
 
     return res.success(200, 'Image removed successfully', updatedGallery);
-  } catch (error) {
-    return res.error(500, error.message, null);
+  } catch {
+    return res.error(500, 'Image delete failed. Please try again', null);
   }
 };

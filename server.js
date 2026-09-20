@@ -12,7 +12,7 @@ const responseHandler = require('./src/middlewares/responseHandler');
 const errorHandler = require('./src/middlewares/errorHandlerMiddleware');
 
 //Routes Imports
-const webshellRoute = require('./src/routes/webShellRoutes/homeItemShowRoute');
+const webshellRoute = require('./src/routes/webShellRoutes/webshellRoutes');
 const homeRoute = require('./src/routes/homeRoutes/homeRoutes');
 const galleryRoutes = require('./src/routes/galleryRoutes/galleryRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes/teacherRoutes');
