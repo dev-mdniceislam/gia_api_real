@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const sscPassedStudentSchema = new mongoose.Schema(
+const passedSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -8,8 +8,8 @@ const sscPassedStudentSchema = new mongoose.Schema(
       trim: true,
     },
     roll: {
-      type: Number,
-      default: null,
+      type: String,
+      default: '',
     },
     examName: {
       type: String,
@@ -28,6 +28,27 @@ const sscPassedStudentSchema = new mongoose.Schema(
       default: '',
     },
   },
+  {
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.imagePublicId;
+        return ret;
+      },
+    },
+  },
+);
+
+const sscPassedStudentSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Title is required'],
+      trim: true,
+    },
+    candidates: [passedSchema],
+  },
   { timestamps: true },
 );
 
@@ -37,8 +58,6 @@ sscPassedStudentSchema.set('toJSON', {
     ret.id = ret._id;
     delete ret._id;
     delete ret.__v;
-    delete ret.imagePublicId;
-
     return ret;
   },
 });

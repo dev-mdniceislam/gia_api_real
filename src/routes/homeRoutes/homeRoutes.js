@@ -18,10 +18,11 @@ const {
 
 const {
   sscStudentGetAll,
-  getSSCStudentsById,
-  createSSCStudent,
-  updateSSCStudent,
-  deleteSSCStudent,
+  createSSCBatch,
+  addCandidate,
+  updateCandidate,
+  deleteCandidate,
+  deleteSSCBatch,
 } = require('../../controllers/homeController/SSCPassedStudentController');
 
 //-------------------> Hero Section Multer & CRUD <-------------------------
@@ -43,15 +44,21 @@ router
   .delete(isValidToken, deleteComment);
 router.get('/parentCommentAdmin', isValidToken, getAllCommentsForAdmin);
 
-// -------------------------> SSC passed student Routes  <-------------------------
+// -----------------------------------------------> SSC passed student Routes  <-------------------------
+router.route('/batch').get(sscStudentGetAll).post(isValidToken, createSSCBatch);
+
+// 2. Get batch by ID & Delete entire batch
+router.route('/batch/:id').delete(isValidToken, deleteSSCBatch);
+
+// 3. Add a new candidate to a specific batch (Image upload সহ)
 router
-  .route('/candidates')
-  .get(sscStudentGetAll)
-  .post(isValidToken, upload.single('image'), createSSCStudent);
+  .route('/batch/candidate')
+  .post(isValidToken, upload.single('image'), addCandidate);
+
+// 4. Update or Delete a specific candidate inside a batch
 router
-  .route('/candidates/:id')
-  .get(getSSCStudentsById)
-  .put(isValidToken, upload.single('image'), updateSSCStudent)
-  .delete(isValidToken, deleteSSCStudent);
+  .route('/batch/candidate/:candidateId')
+  .put(isValidToken, upload.single('image'), updateCandidate)
+  .delete(isValidToken, deleteCandidate);
 
 module.exports = router;
