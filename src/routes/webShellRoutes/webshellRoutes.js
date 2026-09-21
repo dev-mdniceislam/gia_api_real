@@ -23,6 +23,13 @@ const {
   deleteEmergencyNotice,
 } = require('../../controllers/webShellController/emergencyNoticeController');
 
+// Social Link Controller
+const {
+  getSocialLinks,
+  createAndUpdateSocialLinks,
+  deleteSocialLinks,
+} = require('../../controllers/webShellController/socialLinkController');
+
 //-------------------------> Home Show Item Routes <---------------------------
 router
   .route('/homeitemshow')
@@ -41,5 +48,11 @@ router
   .get(getEmergencyNotice)
   .put(isValidToken, upload.single('image'), createAndUpdateNotice)
   .delete(isValidToken, deleteEmergencyNotice);
+
+//-------------------------> Social Link Routes <---------------------------
+router
+  .route('/sociallink')
+  .get(getSocialLinks)
+  .put(isValidToken, createAndUpdateSocialLinks);
 
 module.exports = router;
