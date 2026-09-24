@@ -58,6 +58,7 @@ teacherSchema.set('toJSON', {
     delete ret._id;
     delete ret.__v;
     delete ret.imagePublicId;
+    delete ret.isLeadership;
 
     return ret;
   },

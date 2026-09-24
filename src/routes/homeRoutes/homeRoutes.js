@@ -4,6 +4,10 @@ const router = express.Router();
 const isValidToken = require('../../middlewares/authMiddleware');
 
 const {
+  getAllDataForHome,
+} = require('../../controllers/homeController/homeAllgetForUser');
+
+const {
   getHeroData,
   updateHeroData,
   deleteHeroData,
@@ -26,6 +30,9 @@ const {
 } = require('../../controllers/homeController/SSCPassedStudentController');
 
 //-------------------> Hero Section Multer & CRUD <-------------------------
+
+// Home All data get
+router.get('/homeAll', getAllDataForHome);
 
 router
   .route('/herosection')

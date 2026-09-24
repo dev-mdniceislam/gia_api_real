@@ -3,13 +3,21 @@ const deleteImage = require('../../middlewares/fileDeleteMiddleware');
 
 exports.getAllTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find().sort({ isLeadership: -1 });
+    const [leadershipTeachers, teachers] = await Promise.all([
+      Teacher.find({ isLeadership: true }),
+      Teacher.find({ isLeadership: false }),
+    ]);
 
-    if (!teachers || teachers.length === 0) {
+    if (leadershipTeachers.length === 0 && teachers.length === 0) {
       return res.error(404, 'No teachers found', []);
     }
 
-    return res.success(200, 'Teachers fetched successfully', teachers);
+    const data = {
+      leadership: leadershipTeachers,
+      teachers: teachers,
+    };
+
+    return res.success(200, 'Teachers fetched successfully', data);
   } catch (error) {
     return res.error(500, error.message, null);
   }

@@ -1,43 +1,59 @@
 const Notice = require('../../models/noticeModels/noticeModel');
 
-//notice all get
+// Get all notices (sorted newest first)
 exports.getAllNotice = async (req, res) => {
   try {
-    const result = await Notice.find();
-    res.success(200, 'Notice fetched successfully', result);
-  } catch (error) {
-    res.error(500, error.message, null);
-  }
-};
+    const result = await Notice.find().sort({ createdAt: -1 });
 
-exports.createNotice = async (req, res) => {
-  try {
-    const notice = await Notice.create(req.body);
-    res.success(201, 'Notice created successfully', notice);
-  } catch (error) {
-    res.error(500, error.message, null);
-  }
-};
-
-exports.deleteNotice = async (req, res) => {
-  try {
-    const isDelete = await Notice.findByIdAndDelete(req.params.id);
-    if (!isDelete) {
-      res.error(404, 'Notice not found', null);
+    if (!result || result.length === 0) {
+      return res.error(404, 'No notices found', []);
     }
 
-    res.success(200, 'Notice deleted successfully', isDelete);
+    return res.success(200, 'Notices fetched successfully', result);
   } catch (error) {
-    res.error(500, error.message, null);
+    return res.error(500, error.message, null);
   }
 };
 
+// Create a new notice
+exports.createNotice = async (req, res) => {
+  try {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.error(400, 'Request body cannot be empty', null);
+    }
+
+    const notice = await Notice.create(req.body);
+    return res.success(201, 'Notice created successfully', notice);
+  } catch (error) {
+    return res.error(500, error.message, null);
+  }
+};
+
+// Delete single notice by ID
+exports.deleteNotice = async (req, res) => {
+  try {
+    const deletedNotice = await Notice.findByIdAndDelete(req.params.id);
+
+    if (!deletedNotice) {
+      return res.error(404, 'Notice not found', null);
+    }
+
+    return res.success(200, 'Notice deleted successfully', deletedNotice);
+  } catch (error) {
+    return res.error(500, error.message, null);
+  }
+};
+
+// Delete all notices
 exports.deleteAllNotice = async (req, res) => {
   try {
     const result = await Notice.deleteMany({});
-
-    res.success(200, 'All notices deleted successfully', []);
+    return res.success(
+      200,
+      `${result.deletedCount} notices deleted successfully`,
+      [],
+    );
   } catch (error) {
-    res.error(500, error.message, null);
+    return res.error(500, error.message, null);
   }
 };

@@ -5,7 +5,7 @@ const getPublicIdFromURL = require('../../middlewares/getPublicIdFromURL');
 // ১. গ্যালারির সব ক্যাটাগরি ডাটা গেট করা
 exports.getGalleryDataAll = async (req, res) => {
   try {
-    const galleryItems = await Gallery.find();
+    const galleryItems = await Gallery.find().sort({ createdAt: -1 });
     return res.success(
       200,
       'Gallery images fetched successfully',
