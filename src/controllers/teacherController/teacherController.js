@@ -1,5 +1,5 @@
 const Teacher = require('../../models/teacherModels/teachersModel');
-const deleteImage = require('../../middlewares/fileDeleteMIddleware');
+const deleteImage = require('../../middlewares/fileDeleteMiddleware');
 
 exports.getAllTeachers = async (req, res) => {
   try {

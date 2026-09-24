@@ -1,6 +1,6 @@
 const schoolDetails = require('../../models/AboutSectionModels/schoolDetailsModel');
 const schoolGoals = require('../../models/AboutSectionModels/schoolGoals');
-const deleteFile = require('../../middlewares/fileDeleteMIddleware');
+const deleteFile = require('../../middlewares/fileDeleteMiddleware');
 
 // get about school data
 exports.getAboutSchool = async (req, res) => {
