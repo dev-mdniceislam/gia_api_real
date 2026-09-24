@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// ১. Single Candidate Schema
 const passedSchema = new mongoose.Schema(
   {
     name: {
@@ -27,33 +28,46 @@ const passedSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-  },
-  {
-    toJSON: {
-      transform: (doc, ret) => {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.imagePublicId;
-        return ret;
-      },
+    // Reference to Parent Batch
+    batchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SSCPassedStudentFormat',
+      required: true,
     },
   },
+  { timestamps: true },
 );
 
-const sscPassedStudentSchema = new mongoose.Schema(
+passedSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.batchId;
+    delete ret.imagePublicId;
+    delete ret.__v;
+    return ret;
+  },
+});
+
+// ২. Parent Batch Schema
+const sscPassedFormatSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: [true, 'Title is required'],
       trim: true,
     },
-    candidates: [passedSchema],
+    candidates: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PassedStudent',
+      },
+    ],
   },
   { timestamps: true },
 );
 
-// JSON Response Formatting
-sscPassedStudentSchema.set('toJSON', {
+sscPassedFormatSchema.set('toJSON', {
   transform: (doc, ret) => {
     ret.id = ret._id;
     delete ret._id;
@@ -62,4 +76,13 @@ sscPassedStudentSchema.set('toJSON', {
   },
 });
 
-module.exports = mongoose.model('SSCPassedStudent', sscPassedStudentSchema);
+const SSCPassedStudentFormat = mongoose.model(
+  'SSCPassedStudentFormat',
+  sscPassedFormatSchema,
+);
+const PassedStudent = mongoose.model('PassedStudent', passedSchema);
+
+module.exports = {
+  SSCPassedStudentFormat,
+  PassedStudent,
+};

@@ -1,35 +1,28 @@
-const SSCStudent = require('../../models/homeModels/SSCPassedStudentModel');
-const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMIddleware');
+const {
+  SSCPassedStudentFormat,
+  PassedStudent,
+} = require('../../models/homeModels/SSCPassedStudentModel');
+const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMiddleware');
 
-// 1. Get all SSC records (Title & Candidates list)
+// 1. Get Batch and Populate Candidates (GPA sorted high to low)
 exports.sscStudentGetAll = async (req, res) => {
   try {
-    // 1. একক ব্যাচ অবজেক্টটি খুঁজে বের করা
-    const data = await SSCStudent.findOne();
+    const data = await SSCPassedStudentFormat.findOne().populate({
+      path: 'candidates',
+      options: { sort: { gpa: -1 } },
+    });
 
     if (!data) {
       return res.error(404, 'No SSC student records found', null);
     }
 
-    // 2. Mongoose Document-কে Plain Object-এ রূপান্তর করা
-    const docObject = data.toJSON();
-
-    // 3. candidates অ্যারেটিকে GPA অনুযায়ী (High to Low) সাজানো
-    if (docObject.candidates && docObject.candidates.length > 0) {
-      docObject.candidates.sort((a, b) => b.gpa - a.gpa);
-    }
-
-    return res.success(
-      200,
-      'SSC student records fetched successfully',
-      docObject,
-    );
+    return res.success(200, 'SSC student records fetched successfully', data);
   } catch (error) {
     return res.error(500, error.message, null);
   }
 };
 
-// 3. Create a main Title/Batch group
+// 2. Create Batch
 exports.createSSCBatch = async (req, res) => {
   try {
     const { title } = req.body;
@@ -38,112 +31,104 @@ exports.createSSCBatch = async (req, res) => {
       return res.error(400, 'Title is required', null);
     }
 
-    const newBatch = new SSCStudent({
-      title,
-      candidates: [],
-    });
+    const newBatch = await SSCPassedStudentFormat.findOneAndUpdate(
+      {},
+      {
+        title,
+      },
+      { returnDocument: 'after', runValidators: true, upsert: true },
+    );
 
-    const savedBatch = await newBatch.save();
-    return res.success(201, 'SSC Batch created successfully', savedBatch);
+    return res.success(201, 'SSC Batch created successfully', newBatch);
   } catch (error) {
     return res.error(500, error.message, null);
   }
 };
 
-// 4. Add a candidate one-by-one to the candidates array
+// 3. Add Candidate with Relational Populate Reference
 exports.addCandidate = async (req, res) => {
   try {
     const { name, roll, examName, gpa } = req.body;
 
-    // 1. Required validation
     if (!name || !gpa || !req.file) {
-      if (req.file && req.file.filename) {
+      if (req.file) {
         await deleteFileFromCloudinary(req.file.filename);
       }
       return res.error(400, 'Name, GPA, and Image are required', null);
     }
 
-    const batch = await SSCStudent.findOne();
-
+    const batch = await SSCPassedStudentFormat.findOne();
     if (!batch) {
-      if (req.file && req.file.filename) {
+      if (req.file) {
         await deleteFileFromCloudinary(req.file.filename);
       }
       return res.error(404, 'SSC Batch record not found', null);
     }
 
-    // 3. Duplicate check (batch.candidates অ্যারের ওপর)
-    const isDuplicate = batch.candidates.some((item) => {
-      const isNameMatch = item.name.toLowerCase() === name.trim().toLowerCase();
-      const isRollMatch =
-        roll && item.roll && item.roll.toString() === roll.toString();
-      return isNameMatch || isRollMatch;
+    // Duplicate Check using Child Collection Query
+    const isDuplicate = await PassedStudent.findOne({
+      batchId: batch.id,
+      $or: [{ name: name.trim() }, { roll: roll ? roll.toString() : null }],
     });
 
     if (isDuplicate) {
-      if (req.file && req.file.filename) {
+      if (req.file) {
         await deleteFileFromCloudinary(req.file.filename);
       }
       return res.error(400, 'This student already exists', null);
     }
 
-    // 4. New candidate object
-    const newCandidate = {
+    // Save Candidate document separately
+    const newCandidate = await PassedStudent.create({
       name: name.trim(),
       roll: roll || '',
       examName: examName || '',
       gpa: Number(gpa),
       image: req.file.path,
       imagePublicId: req.file.filename,
-    };
+      batchId: batch.id,
+    });
 
-    // 5. candidates অ্যারেতে পুশ করে সেভ করা
-    batch.candidates.push(newCandidate);
+    // Push Candidate ID to Parent Model and Save
+    batch.candidates.push(newCandidate.id);
     await batch.save();
 
-    return res.success(200, 'Candidate added successfully', batch);
+    return res.success(200, 'Candidate added successfully', newCandidate);
   } catch (error) {
-    if (req.file && req.file.filename) {
+    if (req.file) {
       await deleteFileFromCloudinary(req.file.filename);
     }
     return res.error(500, error.message, null);
   }
 };
 
-// 5. Update a specific candidate inside the candidates array
+// 4. Update Candidate
 exports.updateCandidate = async (req, res) => {
   try {
     const { candidateId } = req.params;
     const { name, roll, examName, gpa } = req.body;
 
-    const record = await SSCStudent.findOne();
-    if (!record) {
-      if (req.file && req.file.filename) {
-        await deleteFileFromCloudinary(req.file.filename);
-      }
-      return res.error(404, 'Batch record not found', null);
-    }
-
-    const candidate = record.candidates.id(candidateId);
+    const candidate = await PassedStudent.findById(candidateId);
     if (!candidate) {
-      if (req.file && req.file.filename) {
+      if (req.file) {
         await deleteFileFromCloudinary(req.file.filename);
       }
       return res.error(404, 'Candidate not found', null);
     }
 
-    if (name || gpa || roll) {
-      const isDuplicate = record.candidates.some((item) => {
-        if (item.id.toString() === candidateId) return false;
-
-        const isNameMatch = name && item.name === name.trim();
-        const isRollMatch =
-          roll && item.roll && item.roll.toString() === roll.toString();
-        return isNameMatch || isRollMatch;
+    // Duplicate check across other candidates in same batch
+    if (name || roll) {
+      const isDuplicate = await PassedStudent.findOne({
+        id: { $ne: candidateId },
+        batchId: candidate.batchId,
+        $or: [
+          name ? { name: name.trim() } : {},
+          roll ? { roll: roll.toString() } : {},
+        ],
       });
 
       if (isDuplicate) {
-        if (req.file && req.file.filename) {
+        if (req.file) {
           await deleteFileFromCloudinary(req.file.filename);
         }
         return res.error(
@@ -154,6 +139,7 @@ exports.updateCandidate = async (req, res) => {
       }
     }
 
+    // Image replacement logic
     if (req.file) {
       if (candidate.imagePublicId) {
         await deleteFileFromCloudinary(candidate.imagePublicId);
@@ -167,66 +153,77 @@ exports.updateCandidate = async (req, res) => {
     if (examName) candidate.examName = examName;
     if (gpa) candidate.gpa = Number(gpa);
 
-    await record.save();
+    await candidate.save();
 
-    return res.success(200, 'Candidate updated successfully', record);
+    const updatedBatch = await SSCPassedStudentFormat.findById(
+      candidate.batchId,
+    ).populate({
+      path: 'candidates',
+      options: { sort: { gpa: -1 } },
+    });
+
+    return res.success(200, 'Candidate updated successfully', updatedBatch);
   } catch (error) {
-    if (req.file && req.file.filename) {
+    if (req.file?.filename) {
       await deleteFileFromCloudinary(req.file.filename);
     }
     return res.error(500, error.message, null);
   }
 };
 
-// 6. Delete a specific candidate from the array (and clean up Cloudinary image)
+// 5. Delete Specific Candidate
 exports.deleteCandidate = async (req, res) => {
   try {
     const { candidateId } = req.params;
 
-    // ১. সিস্টেমে থাকা একক ব্যাচটি খুঁজে বের করা
-    const record = await SSCStudent.findOne();
-    if (!record) {
-      return res.error(404, 'Batch record not found', null);
-    }
-
-    // ২. candidates অ্যারে থেকে নির্দিষ্ট candidate খুঁজে বের করা
-    const candidate = record.candidates.id(candidateId);
+    const candidate = await PassedStudent.findById(candidateId);
     if (!candidate) {
       return res.error(404, 'Candidate not found to delete', null);
     }
 
-    // ৩. Cloudinary থেকে ছবি ডিলিট করা
     if (candidate.imagePublicId) {
       await deleteFileFromCloudinary(candidate.imagePublicId);
     }
 
-    // ৪. candidates অ্যারে থেকে নির্দিষ্ট sub-document টি রিমুভ করা
-    record.candidates.pull(candidateId);
-    await record.save();
+    // Remove reference from parent batch
+    await SSCPassedStudentFormat.findByIdAndUpdate(candidate.batchId, {
+      $pull: { candidates: candidateId },
+    });
 
-    return res.success(200, 'Candidate deleted successfully', record);
+    // Remove candidate document
+    await PassedStudent.findByIdAndDelete(candidateId);
+
+    // const updatedBatch = await SSCPassedStudentFormat.findOne().populate({
+    //   path: 'candidates',
+    //   options: { sort: { gpa: -1 } },
+    // });
+
+    return res.success(200, 'Candidate deleted successfully', []);
   } catch (error) {
     return res.error(500, error.message, null);
   }
 };
 
-// 7. Delete entire Batch group (with all candidate images)
+// 6. Delete Batch & Cascading Delete Candidates
 exports.deleteSSCBatch = async (req, res) => {
   try {
-    const record = await SSCStudent.findOne();
-    if (!record) {
+    const batch = await SSCPassedStudentFormat.findOne();
+    if (!batch) {
       return res.error(404, 'Batch record not found', null);
     }
 
-    if (record.candidates && record.candidates.length > 0) {
-      for (const candidate of record.candidates) {
-        if (candidate.imagePublicId) {
-          await deleteFileFromCloudinary(candidate.imagePublicId);
-        }
+    const candidates = await PassedStudent.find({ batchId: batch._id });
+
+    // Clean Cloudinary images
+    for (const item of candidates) {
+      if (item.imagePublicId) {
+        await deleteFileFromCloudinary(item.imagePublicId);
       }
     }
 
-    await SSCStudent.findByIdAndDelete(record.id);
+    // Delete all candidates and parent batch
+    await PassedStudent.deleteMany({ batchId: batch._id });
+    await SSCPassedStudentFormat.findByIdAndDelete(batch._id);
 
     return res.success(
       200,
