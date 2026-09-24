@@ -4,6 +4,11 @@ const isValidToken = require('../../middlewares/authMiddleware');
 const { upload } = require('../../middlewares/multerMiddleware');
 // Controller imports
 
+// get all webshell data
+const {
+  getAllDataWebShell,
+} = require('../../controllers/webShellController/webshellAllDataGet');
+
 // home item show
 const {
   getHomeItemShow,
@@ -29,6 +34,9 @@ const {
   createAndUpdateSocialLinks,
   deleteSocialLinks,
 } = require('../../controllers/webShellController/socialLinkController');
+
+// webshell all data get
+router.get('/all', getAllDataWebShell);
 
 //-------------------------> Home Show Item Routes <---------------------------
 router

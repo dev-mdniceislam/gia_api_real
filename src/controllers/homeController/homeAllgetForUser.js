@@ -10,7 +10,7 @@ exports.getAllDataForHome = async (req, res) => {
   try {
     const [heroData, candidates, notices, gallery, comments] =
       await Promise.all([
-        heroSection.findOne(),
+        heroSection.findOne().select('-__v -_id').lean(),
         SSCPassedStudentFormat.findOne().populate({
           path: 'candidates',
           options: { sort: { gpa: -1 } },
