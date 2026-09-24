@@ -1,5 +1,5 @@
 const emergencyNotice = require('../../models/webshellModels/emergencyNoticeModel');
-const deleteFile = require('../../middlewares/fileDeleteMIddleware');
+const deleteFile = require('../../middlewares/fileDeleteMiddleware');
 
 exports.getEmergencyNotice = async (req, res) => {
   try {

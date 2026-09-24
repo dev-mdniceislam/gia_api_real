@@ -1,5 +1,5 @@
 const Gallery = require('../../models/gallerySectionModels/galleryModel');
-const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMIddleware');
+const deleteFileFromCloudinary = require('../../middlewares/fileDeleteMiddleware');
 const getPublicIdFromURL = require('../../middlewares/getPublicIdFromURL');
 
 // ১. গ্যালারির সব ক্যাটাগরি ডাটা গেট করা
