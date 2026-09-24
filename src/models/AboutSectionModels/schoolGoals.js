@@ -14,18 +14,14 @@ schoolFeature.set('toJSON', {
   },
 });
 
-const schoolGoalsSchema = new mongoose.Schema(
-  {
-    goals: [{ type: String, required: true, trim: true }],
-    feature: [schoolFeature],
-    commitment: [{ type: String, required: true, trim: true }],
-  },
-  { timestamps: true },
-);
+const schoolGoalsSchema = new mongoose.Schema({
+  goals: [{ type: String, required: true, trim: true }],
+  feature: [schoolFeature],
+  commitment: [{ type: String, required: true, trim: true }],
+});
 
 schoolGoalsSchema.set('toJSON', {
   transform: (doc, ret) => {
-    ret.id = ret._id;
     delete ret._id;
     delete ret.__v;
     return ret;

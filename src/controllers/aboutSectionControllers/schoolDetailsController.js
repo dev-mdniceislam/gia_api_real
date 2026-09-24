@@ -5,15 +5,22 @@ const deleteFile = require('../../middlewares/fileDeleteMiddleware');
 // get about school data
 exports.getAboutSchool = async (req, res) => {
   try {
-    const goalsData = await schoolGoals.find();
-    const schoolDetailsData = await schoolDetails.find();
+    const goalsData = await schoolGoals.findOne();
+    const schoolDetailsData = await schoolDetails.findOne();
+
+    // Mongoose toJSON transform অ্যাপ্লাই করতে toObject() বা toJSON() কল করে Spread করা
+    const formattedGoals = goalsData ? goalsData.toJSON() : {};
+    const formattedDetails = schoolDetailsData
+      ? schoolDetailsData.toJSON()
+      : null;
 
     const data = {
-      ...goalsData,
-      schoolDetails: schoolDetailsData,
+      ...formattedGoals,
+      schoolDetails: formattedDetails,
     };
+
     return res.success(200, 'School About data fetch successfully', data);
-  } catch {
+  } catch (error) {
     return res.error(500, 'School about data fetched failed');
   }
 };

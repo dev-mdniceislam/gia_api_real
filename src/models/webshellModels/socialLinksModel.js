@@ -30,11 +30,9 @@ const socialLinksSchema = new mongoose.Schema(
 
 socialLinksSchema.set('toJSON', {
   transform: (doc, ret) => {
-    const id = ret._id;
     delete ret._id;
     delete ret.__v;
     return {
-      id: id,
       links: ret.links,
       createdAt: ret.createdAt,
       updatedAt: ret.updatedAt,
