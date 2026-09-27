@@ -5,16 +5,18 @@ const {
 const Notice = require('../../models/noticeModels/noticeModel');
 const parentComments = require('../../models/homeModels/parentsCommentsModel');
 const galleryData = require('../../models/gallerySectionModels/galleryModel');
+const schoolDetails = require('../../models/AboutSectionModels/schoolDetailsModel');
 
 exports.getAllDataForHome = async (req, res) => {
   try {
-    const [heroData, candidates, notices, gallery, comments] =
+    const [heroData, candidates, schDetails, notices, gallery, comments] =
       await Promise.all([
         heroSection.findOne().select('-__v -_id').lean(),
         SSCPassedStudentFormat.findOne().populate({
           path: 'candidates',
           options: { sort: { gpa: -1 } },
         }),
+        schoolDetails.findOne().select('-__v -_id -imagePublicId').lean(),
         Notice.find().sort({ createdAt: -1 }).limit(5),
         galleryData
           .find(
@@ -31,6 +33,7 @@ exports.getAllDataForHome = async (req, res) => {
     const data = {
       heroData: heroData || null,
       candidates: candidates || null,
+      schoolDetails: schDetails || null,
       notices: notices || [],
       gallery: gallery || [],
       comments: comments || [],
