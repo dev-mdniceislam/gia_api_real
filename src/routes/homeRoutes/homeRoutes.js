@@ -41,10 +41,7 @@ router
   .put(isValidToken, upload.array('slideImage', 4), updateHeroData);
 
 // -------------------------> Parent Comments Routes <-------------------------
-router
-  .route('/parentComment')
-  .get(getApprovedComments)
-  .post(isValidToken, gurdianComments);
+router.route('/parentComment').get(getApprovedComments).post(gurdianComments);
 router
   .route('/parentComment/:id')
   .patch(isValidToken, updateCommentStatus)
