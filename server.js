@@ -19,6 +19,7 @@ const teacherRoutes = require('./src/routes/teacherRoutes/teacherRoutes');
 const ownerRoutes = require('./src/routes/ownerAuthRoutes/ownerAuth');
 const noticeRoutes = require('./src/routes/noticeRoutes/noticeRoutes');
 const aboutSchoolRoutes = require('./src/routes/aboutSchoolRoutes/aboutSchoolRoutes');
+const contactRoutes = require('./src/routes/ContactScreenRoutes/ContactScreenRoute');
 
 //module scaffolding
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/v1/notice', noticeRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/admin', ownerRoutes);
 app.use('/api/v1/about', aboutSchoolRoutes);
+app.use('/api/v1/contact', contactRoutes);
 
 // Routes handler
 app.use((req, res, next) => {
