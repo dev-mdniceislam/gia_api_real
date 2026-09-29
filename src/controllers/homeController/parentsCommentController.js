@@ -3,11 +3,23 @@ const parentComment = require('../../models/homeModels/parentsCommentsModel');
 // Gurdian Comment (post)
 exports.gurdianComments = async (req, res) => {
   try {
-    const { quote, name, gender, relation } = req.body;
-    const newComment = new parentComment({ quote, name, gender, relation });
+    const { quote, name, gender, relation, email, phone, subject } = req.body;
+    const newComment = new parentComment({
+      quote,
+      name,
+      gender,
+      relation,
+      email,
+      phone,
+      subject,
+    });
     await newComment.save();
     return res.success(201, 'আপনার মতামতটি সফলভাবে জমা হয়েছে।', newComment);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const customMessage = Object.values(error.errors)[0].message;
+      return res.error(400, customMessage, null);
+    }
     return res.error(500, error.message, null);
   }
 };
@@ -17,7 +29,7 @@ exports.getApprovedComments = async (req, res) => {
   try {
     const comments = await parentComment
       .find({ status: 'approved' })
-      .select('-status')
+      .select('-status -email -phone -subject')
       .sort({ createdAt: -1 });
     if (!comments) {
       return res.error(404, 'Comments are not found', null);
